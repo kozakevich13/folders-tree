@@ -6,18 +6,18 @@ import {
   FileOutlined
 } from "@ant-design/icons";
 import "./index.css";
+
 const SORT_OPTIONS = [
   { label: "Назва", value: "name" },
   { label: "Розмір", value: "size" },
   { label: "Дата", value: "mtime" }
 ];
 
-function FilesTree() {
-  const [isOpen, setIsOpen] = useState(false);
-
+function App() {
   const [loading, setLoading] = useState(true);
   const [folders, setFolders] = useState({});
   const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
+  const [isOpen, setIsOpen] = useState({});
 
   useEffect(() => {
     async function fetchData() {
@@ -26,6 +26,7 @@ function FilesTree() {
           "https://prof.world/api/test_json_files/?token=6a06cc0050374e32be51125978904bd8"
         );
         setFolders(response.data.data.files);
+        setIsOpen(Object.fromEntries(Object.keys(response.data.data.files).map(name => [name, false])));
       } catch (error) {
         console.error(error);
       } finally {
@@ -54,7 +55,7 @@ function FilesTree() {
 
   function renderFolder(folderName, files) {
     function handleToggleFolder() {
-      setIsOpen(!isOpen);
+      setIsOpen({ ...isOpen, [folderName]: !isOpen[folderName] });
     }
 
     const sortedFiles = sortFiles(files);
@@ -62,9 +63,9 @@ function FilesTree() {
     return (
       <div key={folderName}>
         <div className="folder" onClick={handleToggleFolder}>
-          {isOpen ? <FolderOpenOutlined /> : <FolderOutlined />} {folderName}
+          {isOpen[folderName] ? <FolderOpenOutlined /> : <FolderOutlined />} {folderName}
         </div>
-        {isOpen && (
+        {isOpen[folderName] && (
           <ul className="fiels-list">
             {sortedFiles.map((file, index) => (
               <li key={index}>
@@ -106,4 +107,4 @@ function FilesTree() {
   );
 }
 
-export default FilesTree;
+export default App
