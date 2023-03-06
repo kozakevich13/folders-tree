@@ -5,6 +5,7 @@ import {
   FolderOpenOutlined,
   FileOutlined
 } from "@ant-design/icons";
+import { Select } from "antd";
 import "./index.css";
 
 const SORT_OPTIONS = [
@@ -14,10 +15,13 @@ const SORT_OPTIONS = [
 ];
 
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [folders, setFolders] = useState({});
-  const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
-  const [isOpen, setIsOpen] = useState({});
+  const [sortBy, setSortBy] = useState(() => {
+    const defaultSortBy = localStorage.getItem("defaultSortBy");
+    return defaultSortBy || SORT_OPTIONS[0].value;
+  });
 
   useEffect(() => {
     async function fetchData() {
@@ -36,6 +40,10 @@ function App() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("defaultSortBy", sortBy);
+  }, [sortBy]);
 
   function sortFiles(files) {
     const sortedFiles = [...files].sort((a, b) => {
@@ -78,8 +86,8 @@ function App() {
     );
   }
 
-  function handleSortByChange(event) {
-    setSortBy(event.target.value);
+  function handleSortByChange(value) {
+    setSortBy(value);
   }
 
   return (
@@ -90,13 +98,17 @@ function App() {
         <div>
           <div>
             Сортувати за:{" "}
-            <select value={sortBy} onChange={handleSortByChange}>
+            <Select
+              defaultValue={sortBy}
+              onChange={handleSortByChange}
+              style={{ width: 120 }}
+            >
               {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <Select.Option key={option.value} value={option.value}>
                   {option.label}
-                </option>
+                </Select.Option>
               ))}
-            </select>
+            </Select>
           </div>
           {Object.entries(folders).map(([folderName, files]) =>
             renderFolder(folderName, files)
@@ -107,4 +119,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
